@@ -1,0 +1,40 @@
+name: Build Yemen4GMonitor APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: unzip -o Yemen4GMonitor.zip
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Generate Gradle wrapper jar
+        working-directory: Yemen4GMonitor
+        run: gradle wrapper --gradle-version 8.7
+
+      - name: Grant execute permission for gradlew
+        working-directory: Yemen4GMonitor
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        working-directory: Yemen4GMonitor
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yemen4GMonitor-debug-apk
+          path: Yemen4GMonitor/app/build/outputs/apk/debug/*.apk
